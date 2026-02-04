@@ -1,7 +1,32 @@
 #!/bin/bash
 
 # Disable extensionUnification
-sed -i 's/}/,\n  "chat.extensionUnification.enabled": false\n}/' ~/.local/share/code-server/User/settings.json
+python3 - <<'PY'
+import json, os
+
+paths = [
+  os.path.expanduser("~/.local/share/code-server/User/settings.json"),
+  os.path.expanduser("~/.config/code-server/User/settings.json"),
+]
+
+for path in paths:
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    data = {}
+    if os.path.exists(path):
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+        except Exception:
+            data = {}
+    data["chat.extensionUnification.enabled"] = False
+    data["extensions.autoCheckUpdates"] = False
+    data["extensions.autoUpdate"] = False
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+        f.write("\n")
+    print("Wrote:", path)
+PY
+
 
 # Download files
 # Copilot
